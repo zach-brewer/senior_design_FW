@@ -147,6 +147,7 @@ int main(void)
     HAL_GPIO_WritePin(DATA_READY_GPIO_Port,
                       DATA_READY_Pin,
                       GPIO_PIN_RESET);
+     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
     /*
      * Wait for one command from the Arduino.
      *
@@ -169,6 +170,8 @@ int main(void)
     if (i2c_rx_command == CMD_START_CAPTURE)
     {
         StartCapture();
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+
 
         /*
          * Wait until all four channels have captured.
@@ -182,6 +185,7 @@ int main(void)
              * Nothing needed here.
              */
         }
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 
         /*
          * Prepare the 16-byte timestamp packet.
