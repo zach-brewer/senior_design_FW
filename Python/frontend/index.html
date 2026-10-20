@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Acoustic Shot Locator — TDOA</title>
+<link rel="stylesheet" href="style.css" />
+<!-- Vendored locally (frontend/vendor/) so the page works with no internet
+     access at all -- appropriate for a lab/range network. Update these two
+     files if you want a newer Plotly/Socket.IO release. -->
+<script src="vendor/socket.io.min.js"></script>
+<script src="vendor/plotly.min.js"></script>
+</head>
+<body>
+  <div class="app">
+
+    <header class="app-header">
+      <div class="header-title">
+        <p class="header-eyebrow">Team Target Practice &middot; Range Instrumentation</p>
+        <h1>Acoustic Shot Locator</h1>
+        <p class="subtitle">6‑mic array (2 rows &times; 3) &middot; time‑difference‑of‑arrival localization</p>
+      </div>
+      <div class="header-status">
+        <span id="connDot" class="status-dot idle"></span>
+        <span id="connText" class="status-text">Connecting…</span>
+        <span id="udpPortText" class="udp-port-text"></span>
+      </div>
+    </header>
+
+    <section class="arm-bar" id="armBar">
+      <div class="arm-bar-status">
+        <span id="armDot" class="status-dot idle"></span>
+        <span id="armText" class="arm-text">Idle — not receiving</span>
+      </div>
+      <button id="btnArm" class="btn btn-arm">Arm system</button>
+    </section>
+
+    <section class="settings-bar" id="settingsBar">
+      <div class="settings-field">
+        <label for="voltageThresholdInput">Mic trigger threshold</label>
+        <input type="number" id="voltageThresholdInput" step="0.01" min="0" inputmode="decimal" />
+        <span class="unit">V</span>
+      </div>
+      <button id="btnSendThreshold" class="btn btn-secondary btn-small">Send to Nucleo</button>
+      <span class="settings-hint" id="thresholdHint"></span>
+    </section>
+
+    <section class="mic-row" id="micRow" aria-label="Live microphone timestamps">
+      <!-- mic cards injected by app.js -->
+    </section>
+
+    <main class="main-grid">
+
+      <section class="panel chart-panel">
+        <div class="panel-header">
+          <h2>Target</h2>
+          <div class="chart-controls">
+            <div class="target-type-field">
+              <label for="targetTypeSelect">Target</label>
+              <select id="targetTypeSelect"></select>
+            </div>
+            <button id="btnSimulate" class="btn btn-primary" disabled>Simulate shot</button>
+            <button id="btnPick" class="btn btn-secondary" aria-pressed="false" disabled>Click target to place shot</button>
+            <button id="btnClear" class="btn btn-ghost">Clear log</button>
+          </div>
+        </div>
+        <div id="chart" class="chart"></div>
+        <p class="chart-hint">Scroll to zoom, drag to pan, click a shot to inspect it, click a group below to isolate it.</p>
+      </section>
+
+      <aside class="panel side-panel">
+
+        <div class="groups-block">
+          <div class="log-header">
+            <h2>Shot groups</h2>
+            <button id="btnShowAllGroups" class="btn btn-ghost btn-small">Show all</button>
+          </div>
+          <div class="log-table-wrap groups-table-wrap">
+            <table class="log-table">
+              <thead>
+                <tr><th>#</th><th>Shots</th><th>Spread</th><th>Ended</th></tr>
+              </thead>
+              <tbody id="groupsTableBody"></tbody>
+            </table>
+            <p id="groupsEmpty" class="log-empty">No groups yet — arm, fire some shots, then disarm.</p>
+          </div>
+        </div>
+
+        <div class="detail-block">
+          <h2>Selected shot</h2>
+          <div id="detailEmpty" class="detail-empty">No shot selected yet.</div>
+          <div id="detailContent" class="detail-content hidden">
+            <div class="detail-grid">
+              <div><span class="detail-label">Score</span><span id="detailScore" class="detail-value score"></span></div>
+              <div><span class="detail-label">Group</span><span id="detailGroup" class="detail-value mono"></span></div>
+              <div><span class="detail-label">Position</span><span id="detailPos" class="detail-value mono"></span></div>
+              <div><span class="detail-label">Distance from center</span><span id="detailDist" class="detail-value mono"></span></div>
+              <div><span class="detail-label">Fit residual</span><span id="detailResidual" class="detail-value mono"></span></div>
+            </div>
+            <h3>Mic arrival times</h3>
+            <table class="mic-time-table" id="detailMicTimes"></table>
+          </div>
+        </div>
+
+        <div class="log-block">
+          <div class="log-header">
+            <h2>Shot log</h2>
+            <button id="btnExport" class="btn btn-ghost btn-small">Export CSV</button>
+          </div>
+          <div class="log-table-wrap">
+            <table class="log-table">
+              <thead>
+                <tr><th>#</th><th>Grp</th><th>Score</th><th>x (m)</th><th>y (m)</th><th>Time</th></tr>
+              </thead>
+              <tbody id="logTableBody"></tbody>
+            </table>
+            <p id="logEmpty" class="log-empty">No shots yet — arm the system, then “Simulate shot”.</p>
+          </div>
+        </div>
+
+      </aside>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
