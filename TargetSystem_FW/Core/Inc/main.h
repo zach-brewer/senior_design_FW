@@ -76,10 +76,6 @@ void Error_Handler(void);
 #define MIC_2_GPIO_Port GPIOA
 #define MIC_4_Pin GPIO_PIN_0
 #define MIC_4_GPIO_Port GPIOB
-#define MIC_5_Pin GPIO_PIN_13
-#define MIC_5_GPIO_Port GPIOB
-#define MIC_6_Pin GPIO_PIN_14
-#define MIC_6_GPIO_Port GPIOB
 #define ETH_RST_Pin GPIO_PIN_9
 #define ETH_RST_GPIO_Port GPIOC
 #define T_SWDIO_Pin GPIO_PIN_13

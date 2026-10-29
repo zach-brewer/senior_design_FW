@@ -28,8 +28,6 @@ COMP_HandleTypeDef hcomp1;
 COMP_HandleTypeDef hcomp2;
 COMP_HandleTypeDef hcomp3;
 COMP_HandleTypeDef hcomp4;
-COMP_HandleTypeDef hcomp5;
-COMP_HandleTypeDef hcomp7;
 
 /* COMP1 init function */
 void MX_COMP1_Init(void)
@@ -100,7 +98,7 @@ void MX_COMP3_Init(void)
   hcomp3.Init.InputPlus = COMP_INPUT_PLUS_IO1;
   hcomp3.Init.InputMinus = COMP_INPUT_MINUS_DAC3_CH1;
   hcomp3.Init.OutputPol = COMP_OUTPUTPOL_NONINVERTED;
-  hcomp3.Init.Hysteresis = COMP_HYSTERESIS_NONE;
+  hcomp3.Init.Hysteresis = COMP_HYSTERESIS_10MV;
   hcomp3.Init.BlankingSrce = COMP_BLANKINGSRC_NONE;
   hcomp3.Init.TriggerMode = COMP_TRIGGERMODE_NONE;
   if (HAL_COMP_Init(&hcomp3) != HAL_OK)
@@ -137,60 +135,6 @@ void MX_COMP4_Init(void)
   /* USER CODE BEGIN COMP4_Init 2 */
 
   /* USER CODE END COMP4_Init 2 */
-
-}
-/* COMP5 init function */
-void MX_COMP5_Init(void)
-{
-
-  /* USER CODE BEGIN COMP5_Init 0 */
-
-  /* USER CODE END COMP5_Init 0 */
-
-  /* USER CODE BEGIN COMP5_Init 1 */
-
-  /* USER CODE END COMP5_Init 1 */
-  hcomp5.Instance = COMP5;
-  hcomp5.Init.InputPlus = COMP_INPUT_PLUS_IO1;
-  hcomp5.Init.InputMinus = COMP_INPUT_MINUS_DAC4_CH1;
-  hcomp5.Init.OutputPol = COMP_OUTPUTPOL_NONINVERTED;
-  hcomp5.Init.Hysteresis = COMP_HYSTERESIS_10MV;
-  hcomp5.Init.BlankingSrce = COMP_BLANKINGSRC_NONE;
-  hcomp5.Init.TriggerMode = COMP_TRIGGERMODE_NONE;
-  if (HAL_COMP_Init(&hcomp5) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN COMP5_Init 2 */
-
-  /* USER CODE END COMP5_Init 2 */
-
-}
-/* COMP7 init function */
-void MX_COMP7_Init(void)
-{
-
-  /* USER CODE BEGIN COMP7_Init 0 */
-
-  /* USER CODE END COMP7_Init 0 */
-
-  /* USER CODE BEGIN COMP7_Init 1 */
-
-  /* USER CODE END COMP7_Init 1 */
-  hcomp7.Instance = COMP7;
-  hcomp7.Init.InputPlus = COMP_INPUT_PLUS_IO1;
-  hcomp7.Init.InputMinus = COMP_INPUT_MINUS_DAC4_CH1;
-  hcomp7.Init.OutputPol = COMP_OUTPUTPOL_NONINVERTED;
-  hcomp7.Init.Hysteresis = COMP_HYSTERESIS_10MV;
-  hcomp7.Init.BlankingSrce = COMP_BLANKINGSRC_NONE;
-  hcomp7.Init.TriggerMode = COMP_TRIGGERMODE_NONE;
-  if (HAL_COMP_Init(&hcomp7) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN COMP7_Init 2 */
-
-  /* USER CODE END COMP7_Init 2 */
 
 }
 
@@ -274,44 +218,6 @@ void HAL_COMP_MspInit(COMP_HandleTypeDef* compHandle)
 
   /* USER CODE END COMP4_MspInit 1 */
   }
-  else if(compHandle->Instance==COMP5)
-  {
-  /* USER CODE BEGIN COMP5_MspInit 0 */
-
-  /* USER CODE END COMP5_MspInit 0 */
-
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    /**COMP5 GPIO Configuration
-    PB13     ------> COMP5_INP
-    */
-    GPIO_InitStruct.Pin = MIC_5_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(MIC_5_GPIO_Port, &GPIO_InitStruct);
-
-  /* USER CODE BEGIN COMP5_MspInit 1 */
-
-  /* USER CODE END COMP5_MspInit 1 */
-  }
-  else if(compHandle->Instance==COMP7)
-  {
-  /* USER CODE BEGIN COMP7_MspInit 0 */
-
-  /* USER CODE END COMP7_MspInit 0 */
-
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    /**COMP7 GPIO Configuration
-    PB14     ------> COMP7_INP
-    */
-    GPIO_InitStruct.Pin = MIC_6_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(MIC_6_GPIO_Port, &GPIO_InitStruct);
-
-  /* USER CODE BEGIN COMP7_MspInit 1 */
-
-  /* USER CODE END COMP7_MspInit 1 */
-  }
 }
 
 void HAL_COMP_MspDeInit(COMP_HandleTypeDef* compHandle)
@@ -376,36 +282,6 @@ void HAL_COMP_MspDeInit(COMP_HandleTypeDef* compHandle)
   /* USER CODE BEGIN COMP4_MspDeInit 1 */
 
   /* USER CODE END COMP4_MspDeInit 1 */
-  }
-  else if(compHandle->Instance==COMP5)
-  {
-  /* USER CODE BEGIN COMP5_MspDeInit 0 */
-
-  /* USER CODE END COMP5_MspDeInit 0 */
-
-    /**COMP5 GPIO Configuration
-    PB13     ------> COMP5_INP
-    */
-    HAL_GPIO_DeInit(MIC_5_GPIO_Port, MIC_5_Pin);
-
-  /* USER CODE BEGIN COMP5_MspDeInit 1 */
-
-  /* USER CODE END COMP5_MspDeInit 1 */
-  }
-  else if(compHandle->Instance==COMP7)
-  {
-  /* USER CODE BEGIN COMP7_MspDeInit 0 */
-
-  /* USER CODE END COMP7_MspDeInit 0 */
-
-    /**COMP7 GPIO Configuration
-    PB14     ------> COMP7_INP
-    */
-    HAL_GPIO_DeInit(MIC_6_GPIO_Port, MIC_6_Pin);
-
-  /* USER CODE BEGIN COMP7_MspDeInit 1 */
-
-  /* USER CODE END COMP7_MspDeInit 1 */
   }
 }
 

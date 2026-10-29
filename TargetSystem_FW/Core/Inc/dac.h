@@ -29,21 +29,23 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "result.h"
 /* USER CODE END Includes */
 
 extern DAC_HandleTypeDef hdac3;
 
-extern DAC_HandleTypeDef hdac4;
-
 /* USER CODE BEGIN Private defines */
-
+#define DAC_REFERENCE_MV 3300U
+#define DAC_FULL_SCALE 4095U
 /* USER CODE END Private defines */
 
 void MX_DAC3_Init(void);
-void MX_DAC4_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+Result_t DAC_SetValue(uint32_t val);
+uint32_t DAC_GetValue(void);
+Result_t DAC_SetThreshold_mV(uint32_t millivolts);
+uint32_t DAC_GetThreshold_mV(void);
 
 /* USER CODE END Prototypes */
 

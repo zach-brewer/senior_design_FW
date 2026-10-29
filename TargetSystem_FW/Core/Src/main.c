@@ -26,17 +26,15 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "app_fsm.h"
+#include "capture.h"
+#include "cmd_ctrl.h"
+#include "result.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-typedef enum{
-  STATE_IDLE,
-  STATE_WAIT_FOR_TRIGGER,
-  STATE_TRIGGERED,
-  STATE_ERROR
-} TargetSystemState_t;
 
 /* USER CODE END PTD */
 
@@ -54,8 +52,11 @@ typedef enum{
 COM_InitTypeDef BspCOMInit;
 
 /* USER CODE BEGIN PV */
-TargetSystemState_t FSM_state = STATE_IDLE;
-uint8_t cmd = 0;
+uint32_t ch1_triggers[16];
+uint32_t ch2_triggers[16];
+uint32_t ch3_triggers[16];
+uint32_t ch4_triggers[16];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -63,7 +64,6 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
 
-void setThreshold_mV(uint16_t mV);
 
 /* USER CODE END PFP */
 
@@ -105,32 +105,29 @@ int main(void)
   MX_COMP2_Init();
   MX_COMP3_Init();
   MX_COMP4_Init();
-  MX_COMP5_Init();
-  MX_TIM1_Init();
   MX_TIM2_Init();
-  MX_COMP7_Init();
   MX_DAC3_Init();
-  MX_DAC4_Init();
   MX_SPI3_Init();
-  MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_DAC_Start(&hdac3, DAC_CHANNEL_1);
-  HAL_DAC_Start(&hdac3, DAC_CHANNEL_2);
-  HAL_DAC_Start(&hdac4, DAC_CHANNEL_1);
+if (HAL_DAC_Start(&hdac3, DAC_CHANNEL_1) != HAL_OK)
+    Error_Handler();
 
-  uint32_t dac_val = 1861; //1.5V
+if (HAL_DAC_Start(&hdac3, DAC_CHANNEL_2) != HAL_OK)
+    Error_Handler();
 
-  HAL_DAC_SetValue(&hdac3, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_val);
-  HAL_DAC_SetValue(&hdac3, DAC_CHANNEL_2, DAC_ALIGN_12B_R, dac_val);
-  HAL_DAC_SetValue(&hdac4, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_val);
+if (DAC_SetThreshold_mV(1500U) != R_Ok)
+    Error_Handler();
 
-  HAL_COMP_Start(&hcomp1);
-  HAL_COMP_Start(&hcomp2);
-  HAL_COMP_Start(&hcomp3);
-  HAL_COMP_Start(&hcomp4);
-  HAL_COMP_Start(&hcomp5);
-  HAL_COMP_Start(&hcomp7);
+  if(HAL_COMP_Start(&hcomp1) != HAL_OK)
+    Error_Handler();
+  if(HAL_COMP_Start(&hcomp2) != HAL_OK)
+    Error_Handler();
+  if(HAL_COMP_Start(&hcomp3) != HAL_OK)
+    Error_Handler();
+  if(HAL_COMP_Start(&hcomp4) != HAL_OK)
+    Error_Handler();
+
 
 
   /* USER CODE END 2 */
@@ -148,9 +145,31 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+    if (AppFSM_Initialize() != R_Ok || Terminal_Init() != R_Ok)
+    Error_Handler();
+  FSMState_t last_state = AppFSM_GetState();
+  printf("\r\nFirmware version 0.1.0\r\n");
+  printf("Commands: arm, status, times, reset, reboot\r\n");
+  printf("DAC commands: dac set <mV>, dac?\r\n");
+  printf("> ");
   while (1)
   {
-    
+    Terminal_Poll();
+    AppFSM_Update();
+    FSMState_t current_state = AppFSM_GetState();
+    if (current_state != last_state)
+    {
+      if (current_state == STATE_TRIGGERED)
+      {
+        printf("All channels triggered\r\n");
+      }
+      else if (current_state == STATE_ERROR)
+      {
+        printf("ERROR %d\r\n", AppFSM_GetLastError());
+      }
+      last_state = current_state;
+    }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

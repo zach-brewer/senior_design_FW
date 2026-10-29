@@ -37,7 +37,8 @@ typedef enum{
     R_ValueError        = 10, /** Invalid variable value*/
     R_CaptureTimeout    = 11, /** Input Capture timed out*/
     R_TimerError        = 12, /** TIM error */
-
+    R_InvalidCMD        = 13, /** Target Command Invalid */ 
+    R_TerminalError          = 14, /** Terminal COM error */
             
 } Result_t;
 
