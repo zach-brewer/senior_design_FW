@@ -8,19 +8,17 @@ static FSMState_t current_state = STATE_IDLE;
 static Result_t last_error = R_Ok;
 static uint32_t capture_start_tick = 0U;
 
+static Result_t enter_error(Result_t error) {
+  Result_t stop_res = Capture_Stop();
 
-static Result_t enter_error(Result_t error)
-{
-    Result_t stop_res = Capture_Stop();
+  current_state = STATE_ERROR;
 
-    current_state = STATE_ERROR;
+  if (stop_res != R_Ok)
+    last_error = stop_res;
+  else
+    last_error = error;
 
-    if (stop_res != R_Ok)
-        last_error = stop_res;
-    else
-        last_error = error;
-
-    return last_error;
+  return last_error;
 }
 
 static Result_t recover_to_idle() {
@@ -55,7 +53,9 @@ Result_t AppFSM_Update(void) {
   if (capture_status.error != 0U)
     return enter_error(R_TimerError);
   if (capture_status.capture_complete != 0U &&
-      capture_status.captured == CAPTURE_MASK) {
+      capture_status.active_mask != 0U &&
+      (capture_status.captured & capture_status.active_mask) ==
+          capture_status.active_mask) {
     res = Capture_Stop();
     if (res != R_Ok)
       return enter_error(res);
@@ -81,33 +81,45 @@ Result_t AppFSM_ProcessCommand(scpiCommand_t cmd, uint32_t arg) {
       cmd != CMD_RECOVER && cmd != CMD_RESET) {
     return res;
   }
-  if (current_state == STATE_ERROR && cmd != CMD_STATUS &&
-      cmd != CMD_QUERY_DAC) {
-    return R_InvalidState;
-  }
-  /* Read-only diagnostic commands remain available after errors. */
+  /* Diagnostic commands are available in every state. */
   if (cmd == CMD_STATUS)
     return R_Ok;
 
+  /* Recovery and reboot must be available in the error state. */
   if (cmd == CMD_RECOVER)
     return recover_to_idle();
 
-  if (cmd == CMD_RESET)
+  if (cmd == CMD_RESET) {
     NVIC_SystemReset();
+    return R_Ok; /* Normally never reached. */
+  }
+
+  /* Permit DAC queries, but block state-changing commands on error. */
+  if (current_state == STATE_ERROR && cmd != CMD_QUERY_DAC)
+    return R_InvalidState;
 
   if (cmd == CMD_NONE)
     return R_InvalidCMD;
 
   switch (cmd) {
   case CMD_ARM_SYSTEM:
-    if (current_state != STATE_IDLE && current_state != STATE_TRIGGERED)
+    if (current_state != STATE_IDLE && current_state != STATE_TRIGGERED) {
       return R_InvalidState;
-    res = Capture_Start();
+    }
+
+    if (arg == 0U || (arg & ~((uint32_t)CAPTURE_MASK)) != 0U) {
+      return R_InvalidArgument;
+    }
+
+    res = Capture_Start((uint8_t)arg);
+
     if (res != R_Ok)
       return enter_error(res);
+
     capture_start_tick = HAL_GetTick();
     current_state = STATE_WAIT_FOR_TRIGGER;
     last_error = R_Ok;
+
     return R_Ok;
   case CMD_SEND_TIME:
     if (current_state != STATE_TRIGGERED)

@@ -35,7 +35,7 @@ STATE_ERROR:
 extern "C" {
 #endif
 
-#define CAPTURE_TIMEOUT_MS 5000U
+#define CAPTURE_TIMEOUT_MS 50000U
 
 typedef enum{
     STATE_IDLE = 0,

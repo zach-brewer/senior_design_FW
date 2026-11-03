@@ -108,6 +108,7 @@ int main(void)
   MX_TIM2_Init();
   MX_DAC3_Init();
   MX_SPI3_Init();
+  MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
 
 if (HAL_DAC_Start(&hdac3, DAC_CHANNEL_1) != HAL_OK)
@@ -148,7 +149,7 @@ if (DAC_SetThreshold_mV(1500U) != R_Ok)
     if (AppFSM_Initialize() != R_Ok || Terminal_Init() != R_Ok)
     Error_Handler();
   FSMState_t last_state = AppFSM_GetState();
-  printf("\r\nFirmware version 0.1.0\r\n");
+  printf("\r\nFirmware version 0.1.1\r\n");
   printf("Commands: arm, status, times, reset, reboot\r\n");
   printf("DAC commands: dac set <mV>, dac?\r\n");
   printf("> ");

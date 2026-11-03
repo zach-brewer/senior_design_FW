@@ -19,7 +19,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "dac.h"
-#include "result.h"
 
 /* USER CODE BEGIN 0 */
 static uint32_t dac_value = 1861;
