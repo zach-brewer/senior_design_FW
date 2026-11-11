@@ -25,13 +25,15 @@ x_max = d3x;
 y_max = d4y;
 
 % Given time delay (D1 = T1-T2, etc)
-% T1 = 8819491/2*1e-6;
-% T2 = 678142/2*1e-6;
-% T3 = 9042115/2*1e-6;
-% T4 = 42019600/2*1e-6;
-D1 = -0.0004362973;
-D2 = 0.0025962968;
-D3 = -0.0017964437;
+
+T1 = hex2dec('004EFB13')/2*1e-6;
+T2 = hex2dec('000000A7')/2*1e-6;
+T3 = hex2dec('0000049F')/2*1e-6;
+T4 = hex2dec('00000164')/2*1e-6;
+%D1 = T2-T1; D2 = T3-T2; D3 = T4-T3;
+D1 = T1-T2; D2 = T2-T3; D3 = T3-T4;
+% D1: 0.0005880249 D2: 0.0003946582 D3: -0.0000739893
+fprintf('D1: %.9f D2: %.9f D3: %.9f\n', D1, D2, D3);
 
 %{ 
 IGNORE THIS BLOCK
@@ -104,7 +106,7 @@ for i = 1:3
 end
 
 % Find all possible values of w
-w_array = sqrt(r);
+w_array = real(sqrt(r));
 
 % Solve for all possible values of all variables
 x_array = C1+w_array.^2*Q1;
@@ -124,12 +126,13 @@ for i = 1:length(w_array)
     calc_R3 = sqrt((x_array(i)-d3x)^2 + (y_array(i)-d3y)^2);
     calc_R4 = sqrt((x_array(i)-d4x)^2 + (y_array(i)-d4y)^2);
 
-    bool1 = abs(R1_array(i) - calc_R1) < 1e-11;
-    bool2 = abs(R2_array(i) - calc_R2) < 1e-11;
-    bool3 = abs(R3_array(i) - calc_R3) < 1e-11;
-    bool4 = abs(R4_array(i) - calc_R4) < 1e-11;
+    bool1 = abs(R1_array(i) - calc_R1) < 1e-6;
+    bool2 = abs(R2_array(i) - calc_R2) < 1e-6;
+    bool3 = abs(R3_array(i) - calc_R3) < 1e-6;
+    bool4 = abs(R4_array(i) - calc_R4) < 1e-6;
 
-    if bool1 && bool2 && bool3 && bool4 && w_array(i) > 330 && x_array(i) > 0 && y_array(i) > 0 && x_array(i) < x_max && y_array(i) < y_max
+    if bool1 && bool2 && bool3 && bool4 
+        % && w_array(i) > 330 && x_array(i) > 0 && y_array(i) > 0 && x_array(i) < x_max && y_array(i) < y_max
         count = count + 1;
         correct_index = i;
     end
@@ -141,3 +144,8 @@ y_correct = y_array(correct_index);
 w_correct = w_array(correct_index);
 
 fprintf('x: %.3f m y: %.3f m w: %.2f m/s\n', x_correct, y_correct, w_correct);
+
+a=343;
+
+alpha = acos(a/w_correct);
+v=a/sin(alpha);
